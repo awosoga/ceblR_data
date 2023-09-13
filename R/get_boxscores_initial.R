@@ -15,7 +15,7 @@ unlist_modified <- function(x) {
   x %>% unname() %>% unlist()
 }
 
-for(season in 2019:2020) {
+for(season in 2019:2023) {
   print(paste("scraping season:", season))
 
   # get boxscore ids
@@ -28,7 +28,7 @@ for(season in 2019:2020) {
     which() %>% names() %>%
     sapply(URLencode) %>%
     sapply(scrape_links, subset_path = "/boxscore") %>%
-    lapply(sapply, extract_id, "boxscore") %>%# tail(1) %>%
+    lapply(sapply, extract_id, "boxscore") %>%
     unlist_modified()
 
   boxscores_current_season <- mapply(scrape_boxscore_data,
