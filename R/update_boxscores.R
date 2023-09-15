@@ -3,18 +3,66 @@ library(dplyr)
 
 update_boxscores <- function(year) {
   season_id <- get_season_id(year)
+  phase = "Regular Season" #adjust this so that it isn't hardcoded?
   boxscore_ids <- paste0("https://hosted.dcd.shared.geniussports.com/CEBL/en/competition/",
                      season_id, "/schedule?") %>%
     scrape_links(subset_path = "/boxscore") %>%
-    sapply(extract_id, "boxscore") %>% clean_data()
+    sapply(extract_id, "boxscore") %>%
+    clean_data() %>% as.numeric()
+  stopifnot(length(boxscore_ids) > 0)
 
-  #See which ones already exists
-  # Set the game type:
+  # see if any games have been recorded yet
+  if(!file.exists(paste0("team_boxscores_", year, ".rds"))) { #eventually be a try-catch?
+    boxscores_current_season <- mapply(scrape_boxscore_data,
+                                       year = season,
+                                       match_id = boxscore_ids,
+                                       phase = phase,
+                                       SIMPLIFY = F) %>% bind_rows()
+
+    # save current season team and player boxscores
+    team_ids <- get_team_info(season) %>% pull(CEBL_id)
+    team_boxscores_current_season <- boxscores_current_season %>% filter(ID %in% team_ids)
+    player_boxscores_current_season <- boxscores_current_season %>% filter(!(ID %in% team_ids))
+
+    saveRDS(team_boxscores_current_season, paste0("team_boxscores_", year, ".rds"))
+    saveRDS(player_boxscores_current_season, paste0("player_boxscores_", season, ".rds"))
+  } else {
+
+  #See which ones have already been scraped
+  existing_ids <- readRDS(paste0("team_boxscores_", year, ".rds")) %>% pull(game_id)
+  new_games <- setdiff(boxscore_ids, existing_ids)
+  stopifnot(length(new_games) > 0)
 
   # scrape boxscore data
+  new_boxscores <- mapply(scrape_boxscore_data,
+                                     year = year,
+                                     match_id = new_games,
+                                     phase = phase,
+                                     SIMPLIFY = F) %>% bind_rows()
+  # add them to old boxscores
+  team_ids <- get_team_info(year) %>% pull(CEBL_id)
+  team_boxscores_new <- new_boxscores %>% filter(ID %in% team_ids)
+  player_boxscores_new <- new_boxscores %>% filter(!(ID %in% team_ids))
 
-  # playerbox:
+  team_boxscores_current_season <- readRDS(paste0("team_boxscores_", year, ".rds")) %>%
+    bind_rows(team_boxscores_new)
+  player_boxscores_current_season <- readRDS(paste0("player_boxscores_", year, ".rds")) %>%
+    bind_rows(player_boxscores_new)
 
-  # game_id, team, player_id, opponent, everything else
+  saveRDS(team_boxscores_current_season, paste0("team_boxscores_", year, ".rds"))
+  saveRDS(player_boxscores_current_season, paste0("player_boxscores_", season, ".rds"))
 
+  }
+
+  # update all time stats
+  team_boxscores_all_seasons <- readRDS("team_boxscores_all_seasons.rds") %>%
+    bind_rows(team_boxscores_current_season)
+
+  player_boxscores_all_seasons <- readRDS("player_boxscores_all_seasons.rds") %>%
+    bind_rows(player_boxscores_current_season)
+
+  saveRDS(team_boxscores_all_seasons, "team_boxscores_all_seasons.rds")
+  saveRDS(player_boxscores_all_seasons, "player_boxscores_all_seasons.rds")
 }
+
+update_boxscores(2023)
