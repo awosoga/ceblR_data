@@ -12,7 +12,11 @@ update_boxscores <- function(year) {
   stopifnot(length(boxscore_ids) > 0)
 
   # see if any games have been recorded yet
-  if(!file.exists(paste0("team_boxscores_", year, ".rds"))) { #eventually be a try-catch?
+  if(inherits(try(
+    read_from_releases(paste0("team_boxscores_", year, ".rds"), "box_scores"),
+    TRUE), "try-error") %>% suppressWarnings()
+    #!file.exists(paste0("team_boxscores_", year, ".rds"))
+     ) {
     boxscores_current_season <- mapply(scrape_boxscore_data,
                                        year = season,
                                        match_id = boxscore_ids,
@@ -24,12 +28,17 @@ update_boxscores <- function(year) {
     team_boxscores_current_season <- boxscores_current_season %>% filter(ID %in% team_ids)
     player_boxscores_current_season <- boxscores_current_season %>% filter(!(ID %in% team_ids))
 
-    saveRDS(team_boxscores_current_season, paste0("team_boxscores_", year, ".rds"))
-    saveRDS(player_boxscores_current_season, paste0("player_boxscores_", season, ".rds"))
+    save_to_releases(team_boxscores_current_season,
+                     paste0("team_boxscores_", year, ".rds"),
+                     "box_scores")
+    save_to_releases(player_boxscores_current_season,
+                     paste0("player_boxscores_", season, ".rds"),
+                     "box_scores")
   } else {
 
   #See which ones have already been scraped
-  existing_ids <- readRDS(paste0("team_boxscores_", year, ".rds")) %>% pull(game_id)
+  existing_ids <- read_from_releases(
+    paste0("team_boxscores_", year, ".rds"), "box_scores") %>% pull(game_id)
   new_games <- setdiff(boxscore_ids, existing_ids)
   stopifnot(length(new_games) > 0)
 
@@ -44,25 +53,31 @@ update_boxscores <- function(year) {
   team_boxscores_new <- new_boxscores %>% filter(ID %in% team_ids)
   player_boxscores_new <- new_boxscores %>% filter(!(ID %in% team_ids))
 
-  team_boxscores_current_season <- readRDS(paste0("team_boxscores_", year, ".rds")) %>%
-    bind_rows(team_boxscores_new)
-  player_boxscores_current_season <- readRDS(paste0("player_boxscores_", year, ".rds")) %>%
-    bind_rows(player_boxscores_new)
+  team_boxscores_current_season <- read_from_releases(
+    paste0("team_boxscores_", year, ".rds"), "box_scores") %>% bind_rows(team_boxscores_new)
+  player_boxscores_current_season <- read_from_releases(
+    paste0("player_boxscores_", year, ".rds"), "box_scores") %>% bind_rows(player_boxscores_new)
 
-  saveRDS(team_boxscores_current_season, paste0("team_boxscores_", year, ".rds"))
-  saveRDS(player_boxscores_current_season, paste0("player_boxscores_", season, ".rds"))
+  save_to_releases(team_boxscores_current_season,
+                   paste0("team_boxscores_", year, ".rds"), "box_scores")
+  save_to_releases(player_boxscores_current_season,
+                   paste0("player_boxscores_", season, ".rds"), "box_scores")
 
   }
 
   # update all time stats
-  team_boxscores_all_seasons <- readRDS("team_boxscores_all_seasons.rds") %>%
+  team_boxscores_all_seasons <- read_from_releases("team_boxscores_all_seasons.rds", "box_scores") %>%
     bind_rows(team_boxscores_current_season)
 
-  player_boxscores_all_seasons <- readRDS("player_boxscores_all_seasons.rds") %>%
+  player_boxscores_all_seasons <- read_from_releases("player_boxscores_all_seasons.rds", "box_scores") %>%
     bind_rows(player_boxscores_current_season)
 
-  saveRDS(team_boxscores_all_seasons, "team_boxscores_all_seasons.rds")
-  saveRDS(player_boxscores_all_seasons, "player_boxscores_all_seasons.rds")
+  save_to_releases(team_boxscores_all_seasons,
+                   "team_boxscores_all_seasons.rds",
+                   "box_scores")
+  save_to_releases(player_boxscores_all_seasons,
+                   "player_boxscores_all_seasons.rds",
+                   "box_scores")
 }
 
-update_boxscores(2023)
+update_boxscores(2024)

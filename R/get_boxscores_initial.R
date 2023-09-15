@@ -42,8 +42,10 @@ for(year in 2019:2023) {
   team_boxscores_current_season <- boxscores_current_season %>% filter(ID %in% team_ids)
   player_boxscores_current_season <- boxscores_current_season %>% filter(!(ID %in% team_ids))
 
-  saveRDS(team_boxscores_current_season, paste0("team_boxscores_", year, ".rds"))
-  saveRDS(player_boxscores_current_season, paste0("player_boxscores_", year, ".rds"))
+  save_to_releases(team_boxscores_current_season,
+                   paste0("team_boxscores_", year, ".rds"), "box_scores")
+  save_to_releases(player_boxscores_current_season,
+                   paste0("player_boxscores_", year, ".rds"), "box_scores")
 
   # update all time team and player boxscores
   player_boxscores_all_seasons <- bind_rows(player_boxscores_all_seasons,
@@ -54,6 +56,6 @@ for(year in 2019:2023) {
 }
 
 # save all time boxscores
-saveRDS(team_boxscores_all_seasons, "team_boxscores_all_seasons.rds")
-saveRDS(player_boxscores_all_seasons, "player_boxscores_all_seasons.rds")
+save_to_releases(team_boxscores_all_seasons, "team_boxscores_all_seasons.rds", "box_scores")
+save_to_releases(player_boxscores_all_seasons, "player_boxscores_all_seasons.rds", "box_scores")
 
