@@ -3,7 +3,7 @@ library(dplyr)
 
 update_boxscores <- function(year) {
   season_id <- get_season_id(year)
-  phase = "Regular Season" #adjust this so that it isn't hardcoded?
+  phase = "Regular Season" #TODO: adjust this so that it isn't hardcoded?
   boxscore_ids <- paste0("https://hosted.dcd.shared.geniussports.com/CEBL/en/competition/",
                      season_id, "/schedule?") %>%
     scrape_links(subset_path = "/boxscore") %>%

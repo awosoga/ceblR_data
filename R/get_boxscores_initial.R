@@ -59,3 +59,4 @@ for(year in 2019:2023) {
 save_to_releases(team_boxscores_all_seasons, "team_boxscores_all_seasons.rds", "box_scores")
 save_to_releases(player_boxscores_all_seasons, "player_boxscores_all_seasons.rds", "box_scores")
 
+sapply(2019:2023, get_league_factors)
