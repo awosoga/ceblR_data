@@ -1,11 +1,5 @@
-library(ceblscrapeR)
-library(dplyr)
-library(tidyr)
-library(lubridate)
-library(stringr)
-library(data.table)
-library(stringdist)
-library(tibble)
+pacman::p_load(dplyr, tidyr, lubridate, stringr, data.table, stringdist, tibble)
+pacman::p_load_gh("awosoga/ceblscrapeR")
 
 get_team_factors <- function(df, team_name) {
   team_stats <- df %>% filter(Team == team_name) %>%
@@ -351,6 +345,7 @@ get_advanced_data <- function(year){
 
     position <- vector()
     for(nom in playerSeasonTotals$Name) {
+
       searchResults <-  afind(playerSeasonRoster$Player, nom)
       index <- which.min(searchResults$distance)
 
@@ -539,7 +534,7 @@ get_advanced_data <- function(year){
     PERlist <- append(PERlist, PER)
   }
 
-  qualifiedPlayers <- qualifiedPlayers %>% mutate("PER" = PERlist) %>% arrange(desc(VORP))
+  qualifiedPlayers <- qualifiedPlayers %>% mutate("PER" = PERlist, year) %>% arrange(desc(VORP))
   rownames(qualifiedPlayers) <- NULL
   qualifiedPlayers
 }

@@ -15,7 +15,7 @@ unlist_modified <- function(x) {
   x %>% unname() %>% unlist()
 }
 
-for(year in 2019:2023) {
+for(year in 2020:2023) {
   print(paste("scraping season:", year))
 
   # get boxscore ids

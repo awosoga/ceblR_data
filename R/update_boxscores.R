@@ -18,13 +18,13 @@ update_boxscores <- function(year) {
     #!file.exists(paste0("team_boxscores_", year, ".rds"))
      ) {
     boxscores_current_season <- mapply(scrape_boxscore_data,
-                                       year = season,
+                                       year = year,
                                        match_id = boxscore_ids,
                                        phase = phase,
                                        SIMPLIFY = F) %>% bind_rows()
 
     # save current season team and player boxscores
-    team_ids <- get_team_info(season) %>% pull(CEBL_id)
+    team_ids <- get_team_info(year) %>% pull(CEBL_id)
     team_boxscores_current_season <- boxscores_current_season %>% filter(ID %in% team_ids)
     player_boxscores_current_season <- boxscores_current_season %>% filter(!(ID %in% team_ids))
 
@@ -32,7 +32,7 @@ update_boxscores <- function(year) {
                      paste0("team_boxscores_", year, ".rds"),
                      "box_scores")
     save_to_releases(player_boxscores_current_season,
-                     paste0("player_boxscores_", season, ".rds"),
+                     paste0("player_boxscores_", year, ".rds"),
                      "box_scores")
   } else {
 
@@ -61,7 +61,7 @@ update_boxscores <- function(year) {
   save_to_releases(team_boxscores_current_season,
                    paste0("team_boxscores_", year, ".rds"), "box_scores")
   save_to_releases(player_boxscores_current_season,
-                   paste0("player_boxscores_", season, ".rds"), "box_scores")
+                   paste0("player_boxscores_", year, ".rds"), "box_scores")
 
   }
 
