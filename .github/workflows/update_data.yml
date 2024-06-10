@@ -26,7 +26,10 @@ jobs:
         with:
           packages: |
             any::pacman
-
+            any::devtools
+            
+      - name: ceblscrapeR Installation
+        run: Rscript -e 'devtools::install_github("awosoga/ceblscrapeR")'
       - name: Update Boxscores # refresh_data
         env:
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
