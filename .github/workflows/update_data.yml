@@ -1,4 +1,4 @@
-name: Update MyZone Data
+name: Update CEBL Data
 
 on:
   #schedule:
@@ -27,10 +27,16 @@ jobs:
           packages: |
             any::pacman
 
-      - name: execute r script # refresh_data
+      - name: Update Boxscores # refresh_data
         env:
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: Rscript -e 'source("R/update_boxscores.R")'
+      - name: Update League Factors # refresh_data
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: Rscript -e 'source("R/update_league_factors.R")'
+      - name: Update Advanced Data # refresh_data
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: Rscript -e 'source("R/update_advanced_data.R")'
 
