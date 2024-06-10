@@ -1,5 +1,5 @@
-library(ceblscrapeR)
-library(dplyr)
+pacman::p_load(dplyr)
+pacman::p_load_gh("awosoga/ceblscrapeR")
 
 update_boxscores <- function(year) {
   season_id <- get_season_id(year)
